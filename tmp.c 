@@ -1,0 +1,105 @@
+
+int stable_combine(int r)
+{
+    int data[r];
+    return stable_combine_until(data, 0, pset.size()-1, 0, r);
+}
+ 
+int stable_combine_until(int *data, int start, int end, int index, int r)
+{
+
+    if (index == r)
+    {
+        // printf("Clique: ");
+        // for(auto ver:hset) printf("%d ", ver);
+        // printf(" ; ");
+        // for (int j=0; j<r; j++) printf("%d ", data[j]);
+        // printf("\n");
+
+        /*
+        vector<int> tmp;
+        int num_dominated = 0;
+        
+        for(auto ver:hset){
+            if(MC_lookup[ver]){
+                num_dominated++;
+            }
+            tmp.push_back(ver);
+        }
+        for(int j=0;j<r;j++){
+            if(MC_lookup[data[j]]) {
+                num_dominated++;
+            }
+            tmp.push_back(data[j]);
+        }
+        if(num_dominated==hset.size()+r){
+            total_num_updates++;
+        }
+
+        // printf("num dominated = %d \n", num_dominated);
+        // assert(num_dominated==hset.size()+r || num_dominated==0);
+        
+        all_mc.push_back(tmp);
+        */
+
+        
+        return 1;
+    }
+
+    // otherwise make a recursive call.
+    int tmp=0;
+    for (int i=start; i<=end && end-i+1 >= r-index; i++)
+    {
+        data[index] = pset[i];
+        tmp = tmp+stable_combine_until(data, i+1, end, index+1, r);
+    }
+    return tmp;
+}
+
+long int stable_init(treeNode *root, int depth, int max_k)
+{
+
+    if(root==NULL) return 0;
+
+    if(root->max_depth<max_k ) return 0; 
+
+    // add the current node (and its label) to the container. 
+    if(root->id>=0){
+        if(root->label==0){
+            hset.push_back(root->id); 
+        }else{
+            pset.push_back(root->id); 
+        }
+    }
+    long int tmp = 0 ; 
+    // long int tmp = 1; 
+
+    if(root->child_node.size()>0){
+        // recurse on its children if any
+        for(auto child : root->child_node){
+            tmp += stable_init(child, depth+1, max_k);
+        }
+    }else{ 
+        // at leave node. we can get the k-cliques: 
+        // printf("at leave node\n");
+        if( hset.size() <= max_k) {
+
+            // couting based 
+            // tmp+=nCr[pset.size()][max_k - hset.size()] ; 
+            
+            // enumeration based 
+            long int curr = stable_combine(max_k - hset.size());  
+
+            tmp += curr ; 
+        }
+    }
+    root->num_cliques = tmp; // record the number of cliques into the tree.
+    if(root->id>=0){
+        if(root->label==0){
+            hset.resize(hset.size()-1); 
+        }else{
+            pset.resize(pset.size()-1); 
+        }
+    }
+    return tmp;
+}
